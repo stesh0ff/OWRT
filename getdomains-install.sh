@@ -617,7 +617,7 @@ add_getdomains() {
     done
 
     if [ "$COUNTRY" == 'russia_inside' ]; then
-        EOF_DOMAINS=DOMAINS=https://github.com/stesh0ff/OWRT/blob/72d5a4404ffbf2f6dcc938f6e6019c79d19195a3/white.lst
+        EOF_DOMAINS=DOMAINS=https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/white.lst
     elif [ "$COUNTRY" == 'russia_outside' ]; then
         EOF_DOMAINS=DOMAINS=https://raw.githubusercontent.com/itdoginfo/allow-domains/main/Russia/outside-dnsmasq-nfset.lst
     elif [ "$COUNTRY" == 'ukraine' ]; then
