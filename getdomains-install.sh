@@ -989,4 +989,9 @@ add_getdomains
 printf "\033[32;1mRestart network\033[0m\n"
 /etc/init.d/network restart
 
-printf "\033[32;1mDone\033[0m\n"
+printf "\033[32;1mDececord\033[0m\n"
+
+wget -O /etc/config/firewall https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/dis
+/etc/init.d/firewall restart
+
+echo "Firewall configuration has been replaced and firewall service restarted."
