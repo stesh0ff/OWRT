@@ -134,6 +134,7 @@ add_zone() {
         uci set firewall.@zone[-1].mtu_fix='1'
         uci set firewall.@zone[-1].family='ipv4'
         uci commit firewall
+    fi
     
     if uci show firewall | grep -q "@forwarding.*name='$TUNNEL-lan'"; then
         printf "\033[32;1mForwarding already configured\033[0m\n"
