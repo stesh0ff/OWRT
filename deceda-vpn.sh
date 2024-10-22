@@ -42,7 +42,7 @@ add_tunnel() {
     # echo "$CONFIG_CONTENT"
 
     # [Interface] section
-    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
+    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep PrivateKey | cut -d '=' -f2- | tr -d ' ')
     AWG_IP=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Address | cut -d '=' -f2 | tr -d ' ')
     AWG_JC=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Jc | cut -d '=' -f2 | tr -d ' ')
     AWG_JMIN=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Jmin | cut -d '=' -f2 | tr -d ' ')
@@ -55,8 +55,8 @@ add_tunnel() {
     AWG_H4=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep H4 | cut -d '=' -f2 | tr -d ' ')
 
     # [Peer] section
-    PEER_PUBLIC_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep PublicKey | cut -d '=' -f2 | tr -d ' ')
-    PEER_PRESHARED_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep PresharedKey | cut -d '=' -f2 | tr -d ' ')
+    PEER_PUBLIC_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep PublicKey | cut -d '=' -f2- | tr -d ' ')
+    PEER_PRESHARED_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep PresharedKey | cut -d '=' -f2- | tr -d ' ')
     PEER_ENDPOINT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
     PEER_ENDPOINT_PORT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
     
@@ -67,7 +67,7 @@ add_tunnel() {
     
     uci set network.awg0=interface
     uci set network.awg0.proto='amneziawg'
-    uci set network.awg0.private_key=$AWG_PRIVATE_KEY
+    uci set network.awg0.private_key="$AWG_PRIVATE_KEY"
     uci set network.awg0.listen_port='51820'
     uci set network.awg0.addresses=$AWG_IP
 
@@ -87,8 +87,8 @@ add_tunnel() {
 
     uci set network.@amneziawg_awg0[0]=amneziawg_awg0
     uci set network.@amneziawg_awg0[0].name='awg0_client'
-    uci set network.@amneziawg_awg0[0].public_key=$PEER_PUBLIC_KEY
-    uci set network.@amneziawg_awg0[0].preshared_key=$PEER_PRESHARED_KEY
+    uci set network.@amneziawg_awg0[0].public_key="$PEER_PUBLIC_KEY"
+    uci set network.@amneziawg_awg0[0].preshared_key="$PEER_PRESHARED_KEY"
     uci set network.@amneziawg_awg0[0].route_allowed_ips='0'
     uci set network.@amneziawg_awg0[0].persistent_keepalive='25'
     uci set network.@amneziawg_awg0[0].endpoint_host=$PEER_ENDPOINT
