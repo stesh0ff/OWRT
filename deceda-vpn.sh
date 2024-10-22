@@ -108,6 +108,7 @@ remove_forwarding() {
 }
 
 add_zone() {
+    TUNNEL=awg0
     if uci show firewall | grep -q "@zone.*name='$TUNNEL'"; then
         printf "\033[32;1mZone already exist\033[0m\n"
     else
@@ -133,7 +134,6 @@ add_zone() {
         uci set firewall.@zone[-1].mtu_fix='1'
         uci set firewall.@zone[-1].family='ipv4'
         uci commit firewall
-    fi
     
     if uci show firewall | grep -q "@forwarding.*name='$TUNNEL-lan'"; then
         printf "\033[32;1mForwarding already configured\033[0m\n"
@@ -152,6 +152,50 @@ add_zone() {
         uci commit firewall
     fi
 }
+
+# add_zone() {
+#     TUNNEL=awg0
+    
+#     printf "\033[32;1mCreate zone\033[0m\n"
+
+#     # Delete exists zone
+#     zone_awg_id=$(uci show firewall | grep -E '@zone.*awg0' | awk -F '[][{}]' '{print $2}' | head -n 1)
+#     if [ "$zone_awg_id" == 0 ] || [ "$zone_awg_id" == 1 ]; then
+#         printf "\033[32;1mawg0 zone has an identifier of 0 or 1. That's not ok. Fix your firewall. lan and wan zones should have identifiers 0 and 1. \033[0m\n"
+#         exit 1
+#     fi
+#     if [ ! -z "$zone_awg_id" ]; then
+#         while uci -q delete firewall.@zone[$zone_awg_id]; do :; done
+#     fi
+
+#     uci add firewall zone
+#     uci set firewall.@zone[-1].name="$TUNNEL"
+#     uci set firewall.@zone[-1].network='awg0'
+#     uci set firewall.@zone[-1].forward='REJECT'
+#     uci set firewall.@zone[-1].output='ACCEPT'
+#     uci set firewall.@zone[-1].input='REJECT'
+#     uci set firewall.@zone[-1].masq='1'
+#     uci set firewall.@zone[-1].mtu_fix='1'
+#     uci set firewall.@zone[-1].family='ipv4'
+#     uci commit firewall
+    
+#     if uci show firewall | grep -q "@forwarding.*name='$TUNNEL-lan'"; then
+#         printf "\033[32;1mForwarding already configured\033[0m\n"
+#     else
+#         printf "\033[32;1mConfigured forwarding\033[0m\n"
+#         # Delete exists forwarding
+#         forward_id=$(uci show firewall | grep -E "@forwarding.*dest='awg'" | awk -F '[][{}]' '{print $2}' | head -n 1)
+#         remove_forwarding
+
+#         uci add firewall forwarding
+#         uci set firewall.@forwarding[-1]=forwarding
+#         uci set firewall.@forwarding[-1].name="$TUNNEL-lan"
+#         uci set firewall.@forwarding[-1].dest="$TUNNEL"
+#         uci set firewall.@forwarding[-1].src='lan'
+#         uci set firewall.@forwarding[-1].family='ipv4'
+#         uci commit firewall
+#     fi
+# }
 
 add_set() {
     if uci show firewall | grep -q "@ipset.*name='vpn_domains'"; then
@@ -356,164 +400,6 @@ install_awg_packages() {
     rm -rf "$AWG_DIR"
 }
 
-add_internal_wg() {
-    PROTOCOL_NAME="AmneziaWG"
-    printf "\033[32;1mConfigure ${PROTOCOL_NAME}\033[0m\n"
-
-    INTERFACE_NAME="awg1"
-    CONFIG_NAME="amneziawg_awg1"
-    PROTO="amneziawg"
-    ZONE_NAME="awg_internal"
-
-    install_awg_packages
-
-
-    CONFIG_URL="https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/One/amnezia_for_awg.conf"
-    CONFIG_CONTENT=$(curl -s "$CONFIG_URL")
-    echo "$CONFIG_CONTENT"
-
-    WG_PRIVATE_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
-    WG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
-    WG_PUBLIC_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PublicKey | cut -d '=' -f2 | tr -d ' ')
-    WG_PRESHARED_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PresharedKey | cut -d '=' -f2 | tr -d ' ')
-    WG_ENDPOINT_INT=$(echo "$CONFIG_CONTENT" | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
-    WG_ENDPOINT_PORT_INT=$(echo "$CONFIG_CONTENT" | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
-    AWG_JC=$(echo "$CONFIG_CONTENT" | grep Jc | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMIN=$(echo "$CONFIG_CONTENT" | grep Jmin | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMAX=$(echo "$CONFIG_CONTENT" | grep Jmax | cut -d '=' -f2 | tr -d ' ')
-    AWG_S1=$(echo "$CONFIG_CONTENT" | grep S1 | cut -d '=' -f2 | tr -d ' ')
-    AWG_S2=$(echo "$CONFIG_CONTENT" | grep S2 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H1=$(echo "$CONFIG_CONTENT" | grep H1 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H2=$(echo "$CONFIG_CONTENT" | grep H2 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H3=$(echo "$CONFIG_CONTENT" | grep H3 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H4=$(echo "$CONFIG_CONTENT" | grep H4 | cut -d '=' -f2 | tr -d ' ')
-
-    uci set network.${INTERFACE_NAME}=interface
-    uci set network.${INTERFACE_NAME}.proto=$PROTO
-    uci set network.${INTERFACE_NAME}.private_key=$WG_PRIVATE_KEY_INT
-    uci set network.${INTERFACE_NAME}.listen_port='51821'
-    uci set network.${INTERFACE_NAME}.addresses=$WG_IP
-
-    uci set network.${INTERFACE_NAME}.awg_jc=$AWG_JC
-    uci set network.${INTERFACE_NAME}.awg_jmin=$AWG_JMIN
-    uci set network.${INTERFACE_NAME}.awg_jmax=$AWG_JMAX
-    uci set network.${INTERFACE_NAME}.awg_s1=$AWG_S1
-    uci set network.${INTERFACE_NAME}.awg_s2=$AWG_S2
-    uci set network.${INTERFACE_NAME}.awg_h1=$AWG_H1
-    uci set network.${INTERFACE_NAME}.awg_h2=$AWG_H2
-    uci set network.${INTERFACE_NAME}.awg_h3=$AWG_H3
-    uci set network.${INTERFACE_NAME}.awg_h4=$AWG_H4
-
-    if ! uci show network | grep -q ${CONFIG_NAME}; then
-        uci add network ${CONFIG_NAME}
-    fi
-
-    uci set network.@${CONFIG_NAME}[0]=$CONFIG_NAME
-    uci set network.@${CONFIG_NAME}[0].name="${INTERFACE_NAME}_client"
-    uci set network.@${CONFIG_NAME}[0].public_key=$WG_PUBLIC_KEY_INT
-    uci set network.@${CONFIG_NAME}[0].preshared_key=$WG_PRESHARED_KEY_INT
-    uci set network.@${CONFIG_NAME}[0].route_allowed_ips='0'
-    uci set network.@${CONFIG_NAME}[0].persistent_keepalive='25'
-    uci set network.@${CONFIG_NAME}[0].endpoint_host=$WG_ENDPOINT_INT
-    uci set network.@${CONFIG_NAME}[0].allowed_ips='0.0.0.0/0'
-    uci set network.@${CONFIG_NAME}[0].endpoint_port=$WG_ENDPOINT_PORT_INT
-    uci commit network
-
-    grep -q "110 vpninternal" /etc/iproute2/rt_tables || echo '110 vpninternal' >> /etc/iproute2/rt_tables
-
-    if ! uci show network | grep -q mark0x2; then
-        printf "\033[32;1mConfigure mark rule\033[0m\n"
-        uci add network rule
-        uci set network.@rule[-1].name='mark0x2'
-        uci set network.@rule[-1].mark='0x2'
-        uci set network.@rule[-1].priority='110'
-        uci set network.@rule[-1].lookup='vpninternal'
-        uci commit
-    fi
-
-    if ! uci show network | grep -q vpn_route_internal; then
-        printf "\033[32;1mAdd route\033[0m\n"
-        uci set network.vpn_route_internal=route
-        uci set network.vpn_route_internal.name='vpninternal'
-        uci set network.vpn_route_internal.interface=$INTERFACE_NAME
-        uci set network.vpn_route_internal.table='vpninternal'
-        uci set network.vpn_route_internal.target='0.0.0.0/0'
-        uci commit network
-    fi
-
-    if ! uci show firewall | grep -q "@zone.*name='${ZONE_NAME}'"; then
-        printf "\033[32;1mZone Create\033[0m\n"
-        uci add firewall zone
-        uci set firewall.@zone[-1].name=$ZONE_NAME
-        uci set firewall.@zone[-1].network=$INTERFACE_NAME
-        uci set firewall.@zone[-1].forward='REJECT'
-        uci set firewall.@zone[-1].output='ACCEPT'
-        uci set firewall.@zone[-1].input='REJECT'
-        uci set firewall.@zone[-1].masq='1'
-        uci set firewall.@zone[-1].mtu_fix='1'
-        uci set firewall.@zone[-1].family='ipv4'
-        uci commit firewall
-    fi
-
-    if ! uci show firewall | grep -q "@forwarding.*name='${ZONE_NAME}'"; then
-        printf "\033[32;1mConfigured forwarding\033[0m\n"
-        uci add firewall forwarding
-        uci set firewall.@forwarding[-1]=forwarding
-        uci set firewall.@forwarding[-1].name="${ZONE_NAME}-lan"
-        uci set firewall.@forwarding[-1].dest=${ZONE_NAME}
-        uci set firewall.@forwarding[-1].src='lan'
-        uci set firewall.@forwarding[-1].family='ipv4'
-        uci commit firewall
-    fi
-
-    if uci show firewall | grep -q "@ipset.*name='vpn_domains_internal'"; then
-        printf "\033[32;1mSet already exist\033[0m\n"
-    else
-        printf "\033[32;1mCreate set\033[0m\n"
-        uci add firewall ipset
-        uci set firewall.@ipset[-1].name='vpn_domains_internal'
-        uci set firewall.@ipset[-1].match='dst_net'
-        uci commit firewall
-    fi
-
-    if uci show firewall | grep -q "@rule.*name='mark_domains_intenal'"; then
-        printf "\033[32;1mRule for set already exist\033[0m\n"
-    else
-        printf "\033[32;1mCreate rule set\033[0m\n"
-        uci add firewall rule
-        uci set firewall.@rule[-1]=rule
-        uci set firewall.@rule[-1].name='mark_domains_intenal'
-        uci set firewall.@rule[-1].src='lan'
-        uci set firewall.@rule[-1].dest='*'
-        uci set firewall.@rule[-1].proto='all'
-        uci set firewall.@rule[-1].ipset='vpn_domains_internal'
-        uci set firewall.@rule[-1].set_mark='0x2'
-        uci set firewall.@rule[-1].target='MARK'
-        uci set firewall.@rule[-1].family='ipv4'
-        uci commit firewall
-    fi
-
-    if uci show dhcp | grep -q "@ipset.*name='vpn_domains_internal'"; then
-        printf "\033[32;1mDomain on vpn_domains_internal already exist\033[0m\n"
-    else
-        printf "\033[32;1mCreate domain for vpn_domains_internal\033[0m\n"
-        uci add dhcp ipset
-        uci add_list dhcp.@ipset[-1].name='vpn_domains_internal'
-        uci add_list dhcp.@ipset[-1].domain='youtube.com'
-        uci add_list dhcp.@ipset[-1].domain='googlevideo.com'
-        uci add_list dhcp.@ipset[-1].domain='youtubekids.com'
-        uci add_list dhcp.@ipset[-1].domain='googleapis.com'
-        uci add_list dhcp.@ipset[-1].domain='ytimg.com'
-        uci add_list dhcp.@ipset[-1].domain='ggpht.com'
-        uci commit dhcp
-    fi
-
-    sed -i "/done/a sed -i '/youtube.com\\\|ytimg.com\\\|ggpht.com\\\|googlevideo.com\\\|googleapis.com\\\|youtubekids.com/d' /tmp/dnsmasq.d/domains.lst" "/etc/init.d/getdomains"
-
-    service dnsmasq restart
-    service network restart
-}
-
 # System Details
 MODEL=$(cat /tmp/sysinfo/model)
 source /etc/os-release
@@ -547,8 +433,6 @@ add_set
 dnsmasqfull
 
 add_dns_resolver
-
-add_internal_wg
 
 add_whitelist
 
