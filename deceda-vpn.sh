@@ -42,23 +42,23 @@ add_tunnel() {
     # echo "$CONFIG_CONTENT"
 
     # [Interface] section
-    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep PrivateKey | cut -d '=' -f2- | tr -d ' ')
-    AWG_IP=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Address | cut -d '=' -f2 | tr -d ' ')
-    AWG_JC=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Jc | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMIN=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Jmin | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMAX=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep Jmax | cut -d '=' -f2 | tr -d ' ')
-    AWG_S1=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep S1 | cut -d '=' -f2 | tr -d ' ')
-    AWG_S2=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep S2 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H1=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep H1 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H2=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep H2 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H3=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep H3 | cut -d '=' -f2 | tr -d ' ')
-    AWG_H4=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | grep H4 | cut -d '=' -f2 | tr -d ' ')
+    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^PrivateKey *= *//p')
+    AWG_IP=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^Address *= *//p')
+    AWG_JC=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^Jc *= *//p')
+    AWG_JMIN=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^Jmin *= *//p')
+    AWG_JMAX=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^Jmax *= *//p')
+    AWG_S1=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^S1 *= *//p')
+    AWG_S2=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^S2 *= *//p')
+    AWG_H1=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^H1 *= *//p')
+    AWG_H2=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^H2 *= *//p')
+    AWG_H3=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^H3 *= *//p')
+    AWG_H4=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Interface\]/,/^\[/p' | sed -n 's/^H4 *= *//p')
 
     # [Peer] section
-    PEER_PUBLIC_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep PublicKey | cut -d '=' -f2- | tr -d ' ')
-    PEER_PRESHARED_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep PresharedKey | cut -d '=' -f2- | tr -d ' ')
-    PEER_ENDPOINT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
-    PEER_ENDPOINT_PORT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
+    PEER_PUBLIC_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | sed -n 's/^PublicKey *= *//p')
+    PEER_PRESHARED_KEY=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | sed -n 's/^PresharedKey *= *//p')
+    PEER_ENDPOINT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | sed -n 's/^Endpoint *= *//p' | cut -d ':' -f1)
+    PEER_ENDPOINT_PORT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | sed -n 's/^Endpoint *= *//p' | cut -d ':' -f2)
     
     # Debug output
     echo "AWG_PRIVATE_KEY: $AWG_PRIVATE_KEY"
@@ -69,7 +69,7 @@ add_tunnel() {
     uci set network.awg0.proto='amneziawg'
     uci set network.awg0.private_key="$AWG_PRIVATE_KEY"
     uci set network.awg0.listen_port='51820'
-    uci set network.awg0.addresses=$AWG_IP
+    uci set network.awg0.addresses="$AWG_IP"
 
     uci set network.awg0.awg_jc=$AWG_JC
     uci set network.awg0.awg_jmin=$AWG_JMIN
@@ -91,10 +91,16 @@ add_tunnel() {
     uci set network.@amneziawg_awg0[0].preshared_key="$PEER_PRESHARED_KEY"
     uci set network.@amneziawg_awg0[0].route_allowed_ips='0'
     uci set network.@amneziawg_awg0[0].persistent_keepalive='25'
-    uci set network.@amneziawg_awg0[0].endpoint_host=$PEER_ENDPOINT
+    uci set network.@amneziawg_awg0[0].endpoint_host="$PEER_ENDPOINT"
     uci set network.@amneziawg_awg0[0].allowed_ips='0.0.0.0/0'
-    uci set network.@amneziawg_awg0[0].endpoint_port=$PEER_ENDPOINT_PORT
+    uci set network.@amneziawg_awg0[0].endpoint_port="$PEER_ENDPOINT_PORT"
     uci commit
+
+    # Verify the settings
+    echo "Verifying settings:"
+    uci get network.awg0.private_key
+    uci get network.@amneziawg_awg0[0].public_key
+    uci get network.@amneziawg_awg0[0].preshared_key
 }
 
 dnsmasqfull() {
