@@ -77,26 +77,26 @@ add_tunnel() {
     uci set network.awg0.awg_h3=$AWG_H3
     uci set network.awg0.awg_h4=$AWG_H4
 
-        if ! uci show network | grep -q decedawg_awg0; then
-        uci add network decedawg_awg0
+    if ! uci show network | grep -q amneziawg_awg0; then
+        uci add network amneziawg_awg0
     fi
 
-    uci set network.@decedawg_awg0[0]=decedawg_awg0
-    uci set network.@decedawg_awg0[0].name='awg0_client'
-    uci set network.@decedawg_awg0[0].public_key="$PEER_PUBLIC_KEY"
-    uci set network.@decedawg_awg0[0].preshared_key="$PEER_PRESHARED_KEY"
-    uci set network.@decedawg_awg0[0].route_allowed_ips='0'
-    uci set network.@decedawg_awg0[0].persistent_keepalive='25'
-    uci set network.@decedawg_awg0[0].endpoint_host="$PEER_ENDPOINT"
-    uci set network.@decedawg_awg0[0].allowed_ips='0.0.0.0/0'
-    uci set network.@decedawg_awg0[0].endpoint_port="$PEER_ENDPOINT_PORT"
+    uci set network.@amneziawg_awg0[0]=amneziawg_awg0
+    uci set network.@amneziawg_awg0[0].name='awg0_client'
+    uci set network.@amneziawg_awg0[0].public_key="$PEER_PUBLIC_KEY"
+    uci set network.@amneziawg_awg0[0].preshared_key="$PEER_PRESHARED_KEY"
+    uci set network.@amneziawg_awg0[0].route_allowed_ips='0'
+    uci set network.@amneziawg_awg0[0].persistent_keepalive='25'
+    uci set network.@amneziawg_awg0[0].endpoint_host="$PEER_ENDPOINT"
+    uci set network.@amneziawg_awg0[0].allowed_ips='0.0.0.0/0'
+    uci set network.@amneziawg_awg0[0].endpoint_port="$PEER_ENDPOINT_PORT"
     uci commit
 
-    # # Verify the settings
-    # echo "Verifying settings:"
-    # uci get network.awg0.private_key
-    # uci get network.@decedawg_awg0[0].public_key
-    # uci get network.@decedawg_awg0[0].preshared_key
+    # Verify the settings
+    echo "Verifying settings:"
+    uci get network.awg0.private_key
+    uci get network.@amneziawg_awg0[0].public_key
+    uci get network.@amneziawg_awg0[0].preshared_key
 }
 
 dnsmasqfull() {
@@ -163,50 +163,6 @@ add_zone() {
         uci commit firewall
     fi
 }
-
-# add_zone() {
-#     TUNNEL=awg0
-    
-#     printf "\033[32;1mCreate zone\033[0m\n"
-
-#     # Delete exists zone
-#     zone_awg_id=$(uci show firewall | grep -E '@zone.*awg0' | awk -F '[][{}]' '{print $2}' | head -n 1)
-#     if [ "$zone_awg_id" == 0 ] || [ "$zone_awg_id" == 1 ]; then
-#         printf "\033[32;1mawg0 zone has an identifier of 0 or 1. That's not ok. Fix your firewall. lan and wan zones should have identifiers 0 and 1. \033[0m\n"
-#         exit 1
-#     fi
-#     if [ ! -z "$zone_awg_id" ]; then
-#         while uci -q delete firewall.@zone[$zone_awg_id]; do :; done
-#     fi
-
-#     uci add firewall zone
-#     uci set firewall.@zone[-1].name="$TUNNEL"
-#     uci set firewall.@zone[-1].network='awg0'
-#     uci set firewall.@zone[-1].forward='REJECT'
-#     uci set firewall.@zone[-1].output='ACCEPT'
-#     uci set firewall.@zone[-1].input='REJECT'
-#     uci set firewall.@zone[-1].masq='1'
-#     uci set firewall.@zone[-1].mtu_fix='1'
-#     uci set firewall.@zone[-1].family='ipv4'
-#     uci commit firewall
-    
-#     if uci show firewall | grep -q "@forwarding.*name='$TUNNEL-lan'"; then
-#         printf "\033[32;1mForwarding already configured\033[0m\n"
-#     else
-#         printf "\033[32;1mConfigured forwarding\033[0m\n"
-#         # Delete exists forwarding
-#         forward_id=$(uci show firewall | grep -E "@forwarding.*dest='awg'" | awk -F '[][{}]' '{print $2}' | head -n 1)
-#         remove_forwarding
-
-#         uci add firewall forwarding
-#         uci set firewall.@forwarding[-1]=forwarding
-#         uci set firewall.@forwarding[-1].name="$TUNNEL-lan"
-#         uci set firewall.@forwarding[-1].dest="$TUNNEL"
-#         uci set firewall.@forwarding[-1].src='lan'
-#         uci set firewall.@forwarding[-1].family='ipv4'
-#         uci commit firewall
-#     fi
-# }
 
 add_set() {
     if uci show firewall | grep -q "@ipset.*name='vpn_domains'"; then
