@@ -39,6 +39,7 @@ add_tunnel() {
 
     CONFIG_URL="https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/One/amnezia_for_awg.conf"
     CONFIG_CONTENT=$(curl -s "$CONFIG_URL")
+    echo "$CONFIG_CONTENT"
 
     AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
     AWG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
@@ -369,6 +370,7 @@ add_internal_wg() {
 
     CONFIG_URL="https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/One/amnezia_for_awg.conf"
     CONFIG_CONTENT=$(curl -s "$CONFIG_URL")
+    echo "$CONFIG_CONTENT"
 
     WG_PRIVATE_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
     WG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
