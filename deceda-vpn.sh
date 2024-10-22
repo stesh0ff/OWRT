@@ -60,10 +60,6 @@ add_tunnel() {
     PEER_ENDPOINT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | sed -n 's/^Endpoint *= *//p' | cut -d ':' -f1)
     PEER_ENDPOINT_PORT=$(echo "$CONFIG_CONTENT" | sed -n '/^\[Peer\]/,/^\[/p' | sed -n 's/^Endpoint *= *//p' | cut -d ':' -f2)
     
-    # Debug output
-    echo "AWG_PRIVATE_KEY: $AWG_PRIVATE_KEY"
-    echo "PEER_PUBLIC_KEY: $PEER_PUBLIC_KEY"
-    echo "PEER_PRESHARED_KEY: $PEER_PRESHARED_KEY"
     
     uci set network.awg0=interface
     uci set network.awg0.proto='amneziawg'
@@ -81,26 +77,26 @@ add_tunnel() {
     uci set network.awg0.awg_h3=$AWG_H3
     uci set network.awg0.awg_h4=$AWG_H4
 
-    if ! uci show network | grep -q amneziawg_awg0; then
-        uci add network amneziawg_awg0
+        if ! uci show network | grep -q decedawg_awg0; then
+        uci add network decedawg_awg0
     fi
 
-    uci set network.@amneziawg_awg0[0]=amneziawg_awg0
-    uci set network.@amneziawg_awg0[0].name='awg0_client'
-    uci set network.@amneziawg_awg0[0].public_key="$PEER_PUBLIC_KEY"
-    uci set network.@amneziawg_awg0[0].preshared_key="$PEER_PRESHARED_KEY"
-    uci set network.@amneziawg_awg0[0].route_allowed_ips='0'
-    uci set network.@amneziawg_awg0[0].persistent_keepalive='25'
-    uci set network.@amneziawg_awg0[0].endpoint_host="$PEER_ENDPOINT"
-    uci set network.@amneziawg_awg0[0].allowed_ips='0.0.0.0/0'
-    uci set network.@amneziawg_awg0[0].endpoint_port="$PEER_ENDPOINT_PORT"
+    uci set network.@decedawg_awg0[0]=decedawg_awg0
+    uci set network.@decedawg_awg0[0].name='awg0_client'
+    uci set network.@decedawg_awg0[0].public_key="$PEER_PUBLIC_KEY"
+    uci set network.@decedawg_awg0[0].preshared_key="$PEER_PRESHARED_KEY"
+    uci set network.@decedawg_awg0[0].route_allowed_ips='0'
+    uci set network.@decedawg_awg0[0].persistent_keepalive='25'
+    uci set network.@decedawg_awg0[0].endpoint_host="$PEER_ENDPOINT"
+    uci set network.@decedawg_awg0[0].allowed_ips='0.0.0.0/0'
+    uci set network.@decedawg_awg0[0].endpoint_port="$PEER_ENDPOINT_PORT"
     uci commit
 
-    # Verify the settings
-    echo "Verifying settings:"
-    uci get network.awg0.private_key
-    uci get network.@amneziawg_awg0[0].public_key
-    uci get network.@amneziawg_awg0[0].preshared_key
+    # # Verify the settings
+    # echo "Verifying settings:"
+    # uci get network.awg0.private_key
+    # uci get network.@decedawg_awg0[0].public_key
+    # uci get network.@decedawg_awg0[0].preshared_key
 }
 
 dnsmasqfull() {
@@ -122,7 +118,7 @@ remove_forwarding() {
 }
 
 add_zone() {
-    TUNNEL=awg0
+    TUNNEL=awg
     if uci show firewall | grep -q "@zone.*name='$TUNNEL'"; then
         printf "\033[32;1mZone already exist\033[0m\n"
     else
