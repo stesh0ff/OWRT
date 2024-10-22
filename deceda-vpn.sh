@@ -37,23 +37,24 @@ add_tunnel() {
 
     route_vpn
 
-    # Read configuration from file
-    CONFIG_FILE="/root/amnezia_for_awg.conf"
-    AWG_PRIVATE_KEY=$(grep PrivateKey $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_IP=$(grep Address $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_JC=$(grep Jc $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMIN=$(grep Jmin $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMAX=$(grep Jmax $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_S1=$(grep S1 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_S2=$(grep S2 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H1=$(grep H1 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H2=$(grep H2 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H3=$(grep H3 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H4=$(grep H4 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_PUBLIC_KEY=$(grep PublicKey $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_PRESHARED_KEY=$(grep PresharedKey $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_ENDPOINT=$(grep Endpoint $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
-    AWG_ENDPOINT_PORT=$(grep Endpoint $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
+    CONFIG_URL="https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/One/amnezia_for_awg.conf"
+    CONFIG_CONTENT=$(curl -s "$CONFIG_URL")
+
+    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
+    AWG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
+    AWG_JC=$(echo "$CONFIG_CONTENT" | grep Jc | cut -d '=' -f2 | tr -d ' ')
+    AWG_JMIN=$(echo "$CONFIG_CONTENT" | grep Jmin | cut -d '=' -f2 | tr -d ' ')
+    AWG_JMAX=$(echo "$CONFIG_CONTENT" | grep Jmax | cut -d '=' -f2 | tr -d ' ')
+    AWG_S1=$(echo "$CONFIG_CONTENT" | grep S1 | cut -d '=' -f2 | tr -d ' ')
+    AWG_S2=$(echo "$CONFIG_CONTENT" | grep S2 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H1=$(echo "$CONFIG_CONTENT" | grep H1 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H2=$(echo "$CONFIG_CONTENT" | grep H2 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H3=$(echo "$CONFIG_CONTENT" | grep H3 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H4=$(echo "$CONFIG_CONTENT" | grep H4 | cut -d '=' -f2 | tr -d ' ')
+    AWG_PUBLIC_KEY=$(echo "$CONFIG_CONTENT" | grep PublicKey | cut -d '=' -f2 | tr -d ' ')
+    AWG_PRESHARED_KEY=$(echo "$CONFIG_CONTENT" | grep PresharedKey | cut -d '=' -f2 | tr -d ' ')
+    AWG_ENDPOINT=$(echo "$CONFIG_CONTENT" | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
+    AWG_ENDPOINT_PORT=$(echo "$CONFIG_CONTENT" | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
     
     uci set network.awg0=interface
     uci set network.awg0.proto='amneziawg'
@@ -367,21 +368,23 @@ add_internal_wg() {
 
     # Read configuration from file
     CONFIG_FILE="/root/amnezia_for_awg_internal.conf"
-    WG_PRIVATE_KEY_INT=$(grep PrivateKey $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    WG_IP=$(grep Address $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    WG_PUBLIC_KEY_INT=$(grep PublicKey $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    WG_PRESHARED_KEY_INT=$(grep PresharedKey $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    WG_ENDPOINT_INT=$(grep Endpoint $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
-    WG_ENDPOINT_PORT_INT=$(grep Endpoint $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
-    AWG_JC=$(grep Jc $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMIN=$(grep Jmin $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_JMAX=$(grep Jmax $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_S1=$(grep S1 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_S2=$(grep S2 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H1=$(grep H1 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H2=$(grep H2 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H3=$(grep H3 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
-    AWG_H4=$(grep H4 $CONFIG_FILE | cut -d '=' -f2 | tr -d ' ')
+    CONFIG_CONTENT=$(cat "$CONFIG_FILE")
+
+    WG_PRIVATE_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
+    WG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
+    WG_PUBLIC_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PublicKey | cut -d '=' -f2 | tr -d ' ')
+    WG_PRESHARED_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PresharedKey | cut -d '=' -f2 | tr -d ' ')
+    WG_ENDPOINT_INT=$(echo "$CONFIG_CONTENT" | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f1)
+    WG_ENDPOINT_PORT_INT=$(echo "$CONFIG_CONTENT" | grep Endpoint | cut -d '=' -f2 | tr -d ' ' | cut -d ':' -f2)
+    AWG_JC=$(echo "$CONFIG_CONTENT" | grep Jc | cut -d '=' -f2 | tr -d ' ')
+    AWG_JMIN=$(echo "$CONFIG_CONTENT" | grep Jmin | cut -d '=' -f2 | tr -d ' ')
+    AWG_JMAX=$(echo "$CONFIG_CONTENT" | grep Jmax | cut -d '=' -f2 | tr -d ' ')
+    AWG_S1=$(echo "$CONFIG_CONTENT" | grep S1 | cut -d '=' -f2 | tr -d ' ')
+    AWG_S2=$(echo "$CONFIG_CONTENT" | grep S2 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H1=$(echo "$CONFIG_CONTENT" | grep H1 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H2=$(echo "$CONFIG_CONTENT" | grep H2 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H3=$(echo "$CONFIG_CONTENT" | grep H3 | cut -d '=' -f2 | tr -d ' ')
+    AWG_H4=$(echo "$CONFIG_CONTENT" | grep H4 | cut -d '=' -f2 | tr -d ' ')
 
     uci set network.${INTERFACE_NAME}=interface
     uci set network.${INTERFACE_NAME}.proto=$PROTO
