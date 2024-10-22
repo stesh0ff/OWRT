@@ -1,15 +1,12 @@
 #!/bin/sh
 
-# Файл конфигурации firewall
 FIREWALL_CONFIG="/etc/config/firewall"
 
-# Проверяем, существует ли файл
 if [ ! -f "$FIREWALL_CONFIG" ]; then
     echo "Файл $FIREWALL_CONFIG не найден!"
     exit 1
 fi
 
-# IP-диапазоны, которые нужно добавить
 IP_RANGES="
 31.13.24.0/21
 31.13.64.0/18
@@ -52,9 +49,7 @@ IP_RANGES="
 66.22.192.0/18
 "
 
-# Перебираем IP-диапазоны и добавляем только те, которых еще нет
 for ip in $IP_RANGES; do
-    # Проверяем, присутствует ли IP-диапазон в конфигурации
     if ! grep -q "$ip" "$FIREWALL_CONFIG"; then
         echo "Добавляю IP-диапазон $ip"
         sed -i "/config ipset/a \ \ list entry '$ip'" "$FIREWALL_CONFIG"
@@ -63,7 +58,6 @@ for ip in $IP_RANGES; do
     fi
 done
 
-# Перезапуск firewall для применения изменений
 /etc/init.d/firewall restart
 
 echo "Firewall перезапущен."
