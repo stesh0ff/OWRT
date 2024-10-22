@@ -366,9 +366,9 @@ add_internal_wg() {
 
     install_awg_packages
 
-    # Read configuration from file
-    CONFIG_FILE="/root/amnezia_for_awg_internal.conf"
-    CONFIG_CONTENT=$(cat "$CONFIG_FILE")
+
+    CONFIG_URL="https://raw.githubusercontent.com/stesh0ff/OWRT/refs/heads/main/One/amnezia_for_awg.conf"
+    CONFIG_CONTENT=$(curl -s "$CONFIG_URL")
 
     WG_PRIVATE_KEY_INT=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
     WG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
