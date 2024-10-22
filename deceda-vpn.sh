@@ -41,7 +41,7 @@ add_tunnel() {
     CONFIG_CONTENT=$(curl -s "$CONFIG_URL")
     echo "$CONFIG_CONTENT"
 
-    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2 | tr -d ' ')
+    AWG_PRIVATE_KEY=$(echo "$CONFIG_CONTENT" | grep PrivateKey | cut -d '=' -f2-)
     AWG_IP=$(echo "$CONFIG_CONTENT" | grep Address | cut -d '=' -f2 | tr -d ' ')
     AWG_JC=$(echo "$CONFIG_CONTENT" | grep Jc | cut -d '=' -f2 | tr -d ' ')
     AWG_JMIN=$(echo "$CONFIG_CONTENT" | grep Jmin | cut -d '=' -f2 | tr -d ' ')
@@ -59,7 +59,7 @@ add_tunnel() {
     
     uci set network.awg0=interface
     uci set network.awg0.proto='amneziawg'
-    uci set network.awg0.private_key=$AWG_PRIVATE_KEY
+    uci set network.awg0.private_key="$AWG_PRIVATE_KEY"
     uci set network.awg0.listen_port='51820'
     uci set network.awg0.addresses=$AWG_IP
 
