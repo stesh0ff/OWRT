@@ -367,6 +367,71 @@ install_awg_packages() {
     rm -rf "$AWG_DIR"
 }
 
+add_dececord() {
+    printf "\033[32;1mAdding Discord IP ranges\033[0m\n"
+
+    FIREWALL_CONFIG="/etc/config/firewall"
+
+    if [ ! -f "$FIREWALL_CONFIG" ]; then
+        echo "File $FIREWALL_CONFIG not found!"
+        return 1
+    fi
+
+    IP_RANGES="
+    31.13.24.0/21
+    31.13.64.0/18
+    45.64.40.0/22
+    57.141.0.0/24
+    57.141.3.0/24
+    57.141.5.0/24
+    57.141.7.0/24
+    57.141.8.0/24
+    57.141.10.0/24
+    57.141.13.0/24
+    57.144.0.0/14
+    66.220.144.0/20
+    69.63.176.0/20
+    69.171.224.0/19
+    74.119.76.0/22
+    102.132.96.0/20
+    103.4.96.0/22
+    129.134.0.0/17
+    157.240.0.0/17
+    157.240.192.0/18
+    163.70.128.0/17
+    173.252.64.0/18
+    179.60.192.0/22
+    185.60.216.0/22
+    185.89.216.0/22
+    204.15.20.0/22
+    138.128.136.0/21
+    162.158.0.0/15
+    172.64.0.0/13
+    34.0.0.0/15
+    34.2.0.0/16
+    34.3.0.0/23
+    34.3.2.0/24
+    35.192.0.0/12
+    35.208.0.0/12
+    35.224.0.0/12
+    35.240.0.0/13
+    5.200.14.128/25
+    66.22.192.0/18
+    "
+
+    for ip in $IP_RANGES; do
+        if ! grep -q "$ip" "$FIREWALL_CONFIG"; then
+            sed -i "/config ipset/a \ \ list entry '$ip'" "$FIREWALL_CONFIG"
+        fi
+    done
+
+    printf "\033[32;1mRestarting firewall\033[0m\n"
+    /etc/init.d/firewall restart
+
+    echo "Firewall restarted."
+    echo "Discord on"
+}
+
 # System Details
 MODEL=$(cat /tmp/sysinfo/model)
 source /etc/os-release
@@ -403,8 +468,9 @@ add_dns_resolver
 
 add_whitelist
 
+add_dececord
 
 printf "\033[32;1mRestart network\033[0m\n"
 /etc/init.d/network restart
 
-printf "\033[32;1mDone\033[0m\n"
+printf "\033[32;1mDeceda - magic, no less\033[0m\n"
