@@ -709,3 +709,4 @@ nftset=/zona.media/4#inet#fw4#vpn_domains
 nftset=/canva.cn/4#inet#fw4#vpn_domains
 nftset=/canva.com/4#inet#fw4#vpn_domains
 nftset=/app.setantasports.com/4#inet#fw4#vpn_domains
+nftset=/app.setantasports.com/home/4#inet#fw4#vpn_domains
