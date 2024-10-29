@@ -33,7 +33,6 @@ add_tunnel() {
     TUNNEL=awg
     printf "\033[32;1mConfigure Amnezia WireGuard\033[0m\n"
 
-    install_awg_packages
 
     route_vpn
 
